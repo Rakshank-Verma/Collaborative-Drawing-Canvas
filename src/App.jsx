@@ -6,9 +6,27 @@ const App = () => {
   const [pos, setPos] = useState({ x: 0, y: 0 });
   const [isDrawing, setIsDrawing] = useState(false);
   const [eraserSize, setEraserSize] = useState(10);
+  const [coords, setCoords] = useState([]);
   const [line, setLine] = useState([]);
 
-  const coord = [];
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    canvas.style.backgroundColor = "#274c43";
+    canvas.width = "800";
+    canvas.height = "500";
+
+    const context = canvas.getContext("2d");
+    context.lineCap = "round";
+    context.strokeStyle = "wheat";
+
+    context.lineWidth = eraserSize;
+    contextRef.current = context;
+    drawHistory();
+  }, [eraserSize]);
+
+  let coord = [];
+  console.log("empty coord");
+
   const draw = (e) => {
     if (isDrawing) {
       contextRef.current.beginPath();
@@ -23,12 +41,13 @@ const App = () => {
   };
 
   const drawHistory = () => {
-
-    for(let i=0; i<line.length-1; i++){
-      contextRef.current.beginPath();
-      contextRef.current.moveTo(...line[i]);
-      contextRef.current.lineTo(...line[i+1]);
-      contextRef.current.stroke();
+    for (let i = 0; i < line.length; i++) {
+      for (let j = 0; j < line[i].length - 1; j++) {
+        contextRef.current.beginPath();
+        contextRef.current.moveTo(...line[i][j]);
+        contextRef.current.lineTo(...line[i][j + 1]);
+        contextRef.current.stroke();
+      }
     }
   };
 
@@ -39,44 +58,16 @@ const App = () => {
 
   const handleOnMouseUp = () => {
     setIsDrawing((prev) => (prev = false));
-    setLine(coord)
+    setLine([...line, coord]);
   };
-
-  // const drawLine = (e) => {
-  //   if (isDrawing) {
-  //     contextRef.current.beginPath();
-  //     contextRef.current.moveTo(pos.x, pos.y);
-  //     contextRef.current.lineTo(e.clientX, e.clientY);
-
-  //     contextRef.current.stroke();
-  //   }
-  // };
 
   const changePenColor = (color) => {
     contextRef.current.strokeStyle = color;
   };
 
   const changeEraserSize = (e) => {
-    contextRef.current.lineWidth = setEraserSize(
-      (prev) => (prev = e.target.value)
-    );
+    contextRef.current.lineWidth = e.target.value
   };
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    canvas.style.backgroundColor = "#274c43";
-    canvas.width = "800";
-    canvas.height = "500";
-
-    const context = canvas.getContext("2d");
-    context.lineCap = "round";
-    context.strokeStyle = "wheat";
-
-    context.lineWidth = eraserSize;
-    contextRef.current = context;
-
-    drawHistory();
-  }, [eraserSize]);
 
   return (
     <>
@@ -110,7 +101,7 @@ const App = () => {
         min="0"
         max="50"
         value={eraserSize}
-        onChange={(e) => setEraserSize(e.target.value)}
+        onChange={(e)=> setEraserSize(e.target.value)}
       ></input>
     </>
   );
