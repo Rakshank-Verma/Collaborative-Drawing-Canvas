@@ -6,7 +6,7 @@ const App = () => {
   const [pos, setPos] = useState({ x: 0, y: 0 });
   const [isDrawing, setIsDrawing] = useState(false);
   const [eraserSize, setEraserSize] = useState(10);
-  const [coords, setCoords] = useState([]);
+  const [prevEraserSize, setPrevEraserSize] = useState(eraserSize);
   const [line, setLine] = useState([]);
 
   useEffect(() => {
@@ -21,11 +21,15 @@ const App = () => {
 
     context.lineWidth = eraserSize;
     contextRef.current = context;
+  }, []);
+
+  useEffect(() => {
+    contextRef.current.lineWidth = prevEraserSize;
     drawHistory();
+    contextRef.current.lineWidth = eraserSize;
   }, [eraserSize]);
 
   let coord = [];
-  console.log("empty coord");
 
   const draw = (e) => {
     if (isDrawing) {
@@ -66,7 +70,10 @@ const App = () => {
   };
 
   const changeEraserSize = (e) => {
-    contextRef.current.lineWidth = e.target.value
+    setEraserSize((prev) => {
+      setPrevEraserSize((prev) => prev);
+      return (prev = e.target.value);
+    });
   };
 
   return (
@@ -101,7 +108,8 @@ const App = () => {
         min="0"
         max="50"
         value={eraserSize}
-        onChange={(e)=> setEraserSize(e.target.value)}
+        // onChange={(e)=> setEraserSize(e.target.value)}
+        onChange={changeEraserSize}
       ></input>
     </>
   );
